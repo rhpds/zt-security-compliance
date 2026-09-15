@@ -106,11 +106,26 @@ approval_checklist:
   content:
     prerequisites_verifiable: false
     assessment_strategy: ""
-    catalog_gap: ""
+    catalog_gap: "This lab is the only catalog item that chains the complete Linux compliance workflow end-to-end on the CLI: CIS Level 1 to Level 2 progression, live automated remediation with before/after verification, autotailor-based policy exceptions, and Image Builder blueprint-embedded hardening. Existing items cover these as isolated pieces (OpenSCAP scanning, Satellite-managed compliance, Image Builder via the Hybrid Cloud Console) but none integrate CIS L1/L2 comparison, autotailor tailoring, and pre-hardened image builds in a single guided beginner series lab."
     design_overview: ""
     module_summaries: []
-    rcars_overlap_pct: null
-    rcars_top_matches: []
+    rcars_overlap_pct: 77
+    rcars_top_matches:
+    - title: "Using OpenSCAP for security compliance and vulnerability scanning"
+      ci_name: "zt-rhelbu.zt-openscap.prod"
+      url: "https://catalog.demo.redhat.com/catalog?item=zt-rhelbu.zt-openscap.prod"
+      relevance_score: 77
+      why_it_fits: "This lab directly covers OpenSCAP, SCAP Security Guide, PCI-DSS and DISA STIG compliance scanning, HTML report generation, and automated remediation on RHEL — matching several core topics in the request. It provides beginner-level hands-on experience with the oscap CLI and compliance workflows that form a strong foundation for the broader curriculum."
+    - title: "Red Hat Satellite Compliance"
+      ci_name: "zt-rhelbu.zt-satellite-compliance.prod"
+      url: "https://catalog.demo.redhat.com/catalog?item=zt-rhelbu.zt-satellite-compliance.prod"
+      relevance_score: 72
+      why_it_fits: "This lab covers OpenSCAP, SCAP Security Guide, XCCDF profiles, tailoring files, DISA STIG, and automated remediation — all core topics in the request. Learners get hands-on experience with the full compliance scanning and remediation workflow on RHEL hosts."
+    - title: "Building custom images with the Image Builder Service"
+      ci_name: "zt-rhelbu.zt-imagebuilder-service.prod"
+      url: "https://catalog.demo.redhat.com/catalog?item=zt-rhelbu.zt-imagebuilder-service.prod"
+      relevance_score: 67
+      why_it_fits: "This lab directly covers Red Hat Image Builder and OpenSCAP compliance profiles as part of building custom RHEL images, aligning with the request's goals around pre-hardened image creation and compliance scanning. Learners gain hands-on experience with image blueprints, filesystem customization, and compliance profile integration on the Hybrid Cloud Console."
     rejections: []
 
   infra:
