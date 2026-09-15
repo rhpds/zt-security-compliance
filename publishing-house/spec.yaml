@@ -107,8 +107,18 @@ approval_checklist:
     prerequisites_verifiable: false
     assessment_strategy: ""
     catalog_gap: "This lab is the only catalog item that chains the complete Linux compliance workflow end-to-end on the CLI: CIS Level 1 to Level 2 progression, live automated remediation with before/after verification, autotailor-based policy exceptions, and Image Builder blueprint-embedded hardening. Existing items cover these as isolated pieces (OpenSCAP scanning, Satellite-managed compliance, Image Builder via the Hybrid Cloud Console) but none integrate CIS L1/L2 comparison, autotailor tailoring, and pre-hardened image builds in a single guided beginner series lab."
-    design_overview: ""
-    module_summaries: []
+    design_overview: "Part 3 of 3 in the RH1 Linux security series, this beginner Zero-Touch lab teaches the end-to-end enterprise workflow for measuring, enforcing, and sustaining Linux security compliance across two RHEL systems. Learners audit a system with OpenSCAP against CIS profiles, apply and verify automated remediation, tailor policy exceptions with autotailor, compare CIS Level 1/Level 2 and PCI-DSS/DISA STIG frameworks, and use Red Hat Image Builder to bake compliance into a pre-hardened image. The guided, hands-on approach moves from reactive scanning to proactive shift-left hardening."
+    module_summaries:
+    - title: "Baseline Assessment (Box 1)"
+      overview: "On an unhardened RHEL host, learners install OpenSCAP and the SCAP Security Guide, run an initial CIS Level 1 - Server audit, and interpret the HTML compliance report to establish a baseline score."
+    - title: "Live System Remediation & Verification (Box 1)"
+      overview: "Learners apply OpenSCAP automated remediation to the same host and re-scan to confirm target controls move from Fail to Pass, closing the audit-remediate-verify loop."
+    - title: "Advanced Security Standards & Scenarios (Box 2)"
+      overview: "On a second system, learners run a CIS Level 2 - Server audit, compare it against the Level 1 baseline, and identify the rule adjustments required for PCI-DSS and DISA STIG frameworks."
+    - title: "Policy Customization & Exception Handling (Box 2)"
+      overview: "Learners use autotailor to build a custom tailoring profile that overrides specific rules without editing vendor content, then scan with the tailoring profile to confirm the exception."
+    - title: "Proactive Compliance with Image Builder (Box 2)"
+      overview: "Learners use Red Hat Image Builder (osbuild-composer) to define a blueprint embedding OpenSCAP directives and build a pre-hardened QCOW2 RHEL image that is compliant from first boot."
     rcars_overlap_pct: 77
     rcars_top_matches:
     - title: "Using OpenSCAP for security compliance and vulnerability scanning"
