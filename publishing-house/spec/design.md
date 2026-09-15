@@ -1,89 +1,88 @@
-# [Project Title]
-
-<!-- This file is the design document for your lab or demo. -->
-<!-- Fill in each section below, or run /rhdp-publishing-house to have the intake skill help. -->
-<!-- Sections marked with [brackets] are placeholders — replace with real content. -->
-<!-- The validation gate checks for all required sections before submission. -->
+# Automated Linux Security Compliance & Hardening
 
 ## Overview
 
-[2-3 sentences on what this lab or demo is and why it exists. Then a direct description of what participants will do — specific enough that someone reading this section immediately understands the content without interpretation. No flowery language. Example: "Participants will deploy a 3-tier application on OpenShift, configure autoscaling, and troubleshoot a simulated pod failure."]
+This lab teaches the end-to-end workflow that enterprise teams use to measure, enforce, and sustain Linux security compliance. It is Part 3 of 3 in the RH1 Linux security series, building on the foundation established in the earlier parts. Working across two Red Hat Enterprise Linux systems, participants run an OpenSCAP audit against a CIS profile, interpret the compliance report, apply automated remediation, and verify that controls move from Fail to Pass. They then compare CIS Level 1 and Level 2 standards, create custom rule exceptions with `autotailor`, and use Red Hat Image Builder to bake a compliance profile directly into a pre-hardened VM image.
 
 ## Target Audience
 
-- **Role:** [Data scientists, platform engineers, developers, etc.]
-- **Experience level:** [Beginner, intermediate, or advanced]
-- **What they already know:** [Existing skills and knowledge]
-- **What they don't know:** [Skills this lab teaches]
+- **Role:** Linux system administrators and security-focused operators
+- **Experience level:** Beginner (within the guided RH1 series; Parts 1–2 provide prerequisite context)
+- **What they already know:** Basic Linux shell navigation and running commands as covered in Parts 1–2 of the series
+- **What they don't know:** How to audit, remediate, tailor, and enforce security compliance using OpenSCAP, the SCAP Security Guide, `autotailor`, and Image Builder
 
 ## Prerequisites
 
-- [What the learner must know or have completed before starting]
-- [Can the lab validate these automatically? Yes/No — brief explanation]
-
-<!-- If no prerequisites, write "None" -->
+- Completion of Parts 1 and 2 of the RH1 Linux security series (or equivalent familiarity with the RHEL command line)
+- Comfort running commands in a Linux terminal
+- These prerequisites are trust-based — the lab does not automatically validate prior series completion.
 
 ## Learning Objectives
 
-1. [Action verb] [specific, measurable outcome]
-2. [Action verb] [specific, measurable outcome]
-3. [Action verb] [specific, measurable outcome]
-
-<!-- Scale to duration: up to 3 objectives per 45 min of content. Start with action verbs: Configure, Deploy, Create, Implement, Troubleshoot, Monitor, Scale. Each should be testable. NOT: Understand, Learn, Know. -->
+1. Analyze a system's security posture by running an OpenSCAP audit against the CIS Level 1 - Server profile and interpreting the HTML compliance report.
+2. Secure a live RHEL system by executing automated OpenSCAP remediation and verifying that target controls change from Fail to Pass.
+3. Analyze the differences between CIS Level 1 and CIS Level 2 profiles and identify the rule adjustments required for alternate frameworks such as PCI-DSS and DISA STIG.
+4. Configure a custom tailoring profile with `autotailor` to override specific rules without editing vendor source content.
+5. Build a pre-hardened RHEL image with Red Hat Image Builder by embedding OpenSCAP directives into a blueprint.
 
 ## Content Type
 
-[Lab (hands-on) or Demo (presenter-led)]
+Lab (hands-on), delivered as a Zero-Touch guided Showroom experience.
 
 ## Products & Technologies
 
-- [Official Red Hat product name with version if relevant]
-- [Additional products/technologies]
-
-<!-- Use official names: "Red Hat OpenShift", not "OpenShift". List upstream projects separately. -->
+- Red Hat Enterprise Linux
+- OpenSCAP (audit and remediation engine)
+- SCAP Security Guide (CIS, PCI-DSS, and DISA STIG policy content)
+- `autotailor` (custom tailoring of SCAP profiles)
+- Red Hat Image Builder (osbuild-composer — pre-hardened image builds)
 
 ## Module Map
 
 | Module | Title | Duration |
 |--------|-------|----------|
-| 1 | [Module title] | [XX min] |
-| 2 | [Module title] | [XX min] |
-| — | **Total hands-on** | **[X hours]** |
-| — | Intro / presentation | [~XX min] |
-| — | **Total lab** | **[~X hours]** |
-
-<!-- Each module 10-30 min. Total: lab 1-4 hours, demo 15-45 min. Modules should build on each other. -->
+| 1 | Baseline Assessment (Box 1) | 7 min |
+| 2 | Live System Remediation & Verification (Box 1) | 6 min |
+| 3 | Advanced Security Standards & Scenarios (Box 2) | 8 min |
+| 4 | Policy Customization & Exception Handling (Box 2) | 7 min |
+| 5 | Proactive Compliance with Image Builder (Box 2) | 8 min |
+| — | **Total hands-on** | **36 min** |
+| — | Intro / orientation | ~3 min |
+| — | **Total lab** | **~39 min** |
 
 ## Difficulty Level
 
-[Beginner, Intermediate, or Advanced]
+Beginner
 
 ## Environment
 
-**Learner view:** [What exists when the lab starts — pre-deployed resources, what participants see and interact with. Be specific about cluster details.]
+**Learner view:** When the lab starts, two Red Hat Enterprise Linux systems are pre-deployed and reachable from the guided Showroom terminal — **Box 1** (the initial audit-and-remediation host) and **Box 2** (the advanced-standards, tailoring, and image-building host). OpenSCAP and the SCAP Security Guide content are available for installation, and Box 2 has the tooling needed for `autotailor` and Image Builder workflows. Participants interact entirely through the command line and read generated HTML compliance reports.
 
-**Automation needed:** [Yes/No]
+**Automation needed:** Yes.
 
-[If yes, list what automation must provision — operators, per-user resources, sample apps, data sets.]
+Automation must provision the two RHEL VMs, ensure package repositories for OpenSCAP, the SCAP Security Guide, `autotailor`, and osbuild-composer are reachable, and place the systems in the expected starting state (Box 1 unhardened for the baseline scan; Box 2 ready for Level 2 audits and image builds).
 
 ## Infrastructure Requirements
 
-- **Cloud provider:** [CNV (default), AWS, or Troshka (bare-metal/nested virt)]
-- **Cluster type:** [Multinode or SNO (Single Node OpenShift)]
-- **OCP version:** [e.g. 4.20 — minimum 4.20]
-- **Topology:** [Shared cluster, per-student, or CNV pool]
-- **Sizing:** [Node types and counts with resources — e.g., "3 control plane (16 CPU, 64GB RAM), 6 workers (8 CPU, 32GB RAM, 100GB disk)"]
-- **Automation approach:** [Ansible, GitOps (Helm + ArgoCD), or combo]
-- **AI/MaaS:** [None, MaaS (open-source model), MaaS (frontier model), or dedicated GPU — include justification if not "none"]
-- **External services:** [Named services — e.g., github.com, registry.access.redhat.com — or "None"]
-- **AAP version:** [e.g. 2.5 — only if AAP is in products; omit otherwise]
-- **Non-GA products:** [Product name + version, with access plan — or "None (all products are GA)"]
-
-<!-- Not all fields must be known at intake. "TBD, estimating ~X" is fine. -->
+- **Cloud provider:** TBD — confirmed in infrastructure phase
+- **Cluster type:** TBD — confirmed in infrastructure phase
+- **OCP version:** TBD — confirmed in infrastructure phase
+- **Topology:** TBD — confirmed in infrastructure phase
+- **Sizing:** TBD — confirmed in infrastructure phase
+- **Automation approach:** TBD — confirmed in infrastructure phase
+- **AI/MaaS:** TBD — confirmed in infrastructure phase
+- **External services:** TBD — confirmed in infrastructure phase
+- **AAP version:** TBD — confirmed in infrastructure phase
+- **Non-GA products:** TBD — confirmed in infrastructure phase
 
 ## Assessment Strategy (Optional)
 
-<!-- Optional — skip this section for demos or classic labs without verification. -->
-<!-- Relevant for Zero-Touch labs with solve/validate buttons or labs with automated checks. -->
+Each module concludes with a verifiable result:
 
-[If applicable: how will we know the learner successfully completed each module? Per module: verification script, solve/validate button, visible result in the UI, or automated check.]
+- **Module 1:** An initial OpenSCAP scan completes and produces an HTML report showing the baseline CIS Level 1 score.
+- **Module 2:** A follow-up scan confirms target controls have moved from Fail to Pass, raising the compliance score.
+- **Module 3:** A CIS Level 2 scan on Box 2 completes and the learner identifies the added/changed controls versus Level 1.
+- **Module 4:** A scan run with the custom `autotailor` tailoring profile reflects the disabled rule(s).
+- **Module 5:** A pre-hardened QCOW2 image is successfully built from a blueprint containing OpenSCAP directives.
+
+As a Zero-Touch guided lab, per-module solve/validate checks confirm these outcomes.
