@@ -64,16 +64,20 @@ Automation must provision the two RHEL VMs, ensure package repositories for Open
 
 ## Infrastructure Requirements
 
-- **Cloud provider:** TBD — confirmed in infrastructure phase
-- **Cluster type:** TBD — confirmed in infrastructure phase
-- **OCP version:** TBD — confirmed in infrastructure phase
-- **Topology:** TBD — confirmed in infrastructure phase
-- **Sizing:** TBD — confirmed in infrastructure phase
-- **Automation approach:** TBD — confirmed in infrastructure phase
-- **AI/MaaS:** TBD — confirmed in infrastructure phase
-- **External services:** TBD — confirmed in infrastructure phase
-- **AAP version:** TBD — confirmed in infrastructure phase
-- **Non-GA products:** TBD — confirmed in infrastructure phase
+- **Platform:** RHEL VMs (not OpenShift)
+- **Cloud provider:** CNV
+- **Topology:** Per-student (each learner gets their own dedicated environment)
+- **Sizing (per student):**
+  - **Box 1** — audit & remediation host: RHEL 10, 2 vCPU, 4 GB RAM, 30 GB disk
+  - **Box 2** — advanced standards + Image Builder host: RHEL 10, 4 vCPU, 8 GB RAM, 60 GB disk (extra CPU/disk for osbuild-composer image builds)
+- **Operating system:** Red Hat Enterprise Linux 10 (both boxes)
+- **Automation approach:** Ansible
+- **AI/MaaS:** None
+- **External services:**
+  - `cdn.redhat.com` — RHEL 10 package content (openscap, scap-security-guide, autotailor, osbuild-composer)
+  - `subscription.rhsm.redhat.com` — subscription / entitlement
+- **AAP version:** N/A (AAP not used)
+- **Non-GA products:** None (all products are GA)
 
 ## Assessment Strategy (Optional)
 
