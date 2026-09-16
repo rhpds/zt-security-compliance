@@ -1,5 +1,5 @@
 name: modules
-title: My Lab Title
+title: Automated Linux Security Compliance & Hardening
 version: ~
 nav:
   - modules/ROOT/nav.adoc

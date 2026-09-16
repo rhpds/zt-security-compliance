@@ -1,0 +1,15 @@
+---
+antora:
+  name: modules
+  dir: www
+  modules:
+    - name: index
+      label: "Introduction"
+
+tabs:
+  - name: ">_ Box 1"
+    path: /wetty
+  - name: ">_ Box 2"
+    path: /terminal2
+  - name: Security Hardening Docs
+    url: 'https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/10/html/security_hardening/index'
