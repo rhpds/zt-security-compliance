@@ -8,18 +8,19 @@ virtualmachines:
     image_size: "40G"
     tags:
       - key: "AnsibleGroup"
-        value: "nodes"
+        value: "bastions"
     networks:
       - default
     packages:
-      - openscap-scanner
-      - scap-security-guide
-      - openscap-utils
+      - git
+      - cockpit
+      - tmux
+
   - name: "node1"
     image: "rhel-10-1-04-15-26"
     bootloader: efi
-    memory: "8G"
-    cores: 2
+    memory: "4G"
+    cores: 1
     image_size: "40G"
     tags:
       - key: "AnsibleGroup"
@@ -27,8 +28,7 @@ virtualmachines:
     networks:
       - default
     packages:
-      - openscap-scanner
-      - scap-security-guide
-      - openscap-utils
-      - osbuild-composer
-      - composer-cli
+      - git
+      - cockpit
+      - tmux
+
