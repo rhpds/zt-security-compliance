@@ -1,15 +1,33 @@
 ---
+
 antora:
   name: modules
   dir: www
   modules:
-    - name: index
-      label: "Introduction"
+    - name: module-01
+      label: "About This Lab"
+      solveButton: false
+    - name: module-02
+      label: "Vulnerability & Patch Management"
+      solveButton: false
+    - name: module-03
+      label: "Baseline Compliance Audit (CIS L1)"
+      solveButton: false
+    - name: module-04
+      label: "Automated Remediation to CIS L1"
+      solveButton: false
+    - name: module-05
+      label: "Standard vs. Maximum (CIS L2)"
+      solveButton: false
+    - name: module-06
+      label: "Operational Exceptions with autotailor"
+      solveButton: false
+    - name: module-07
+      label: "Compliance-as-Code with Image Builder"
+      solveButton: false
 
 tabs:
-  - name: ">_ Box 1"
+  - name: ">_ terminal"
     path: /wetty
-  - name: ">_ Box 2"
-    path: /terminal2
-  - name: Security Hardening Docs
-    url: 'https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/10/html/security_hardening/index'
+    port: 443
+

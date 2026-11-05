@@ -1,0 +1,83 @@
+= Baseline Compliance Audit (CIS Level 1)
+
+How secure is this system _right now_, straight out of the box? You cannot improve what you do
+not measure. In this module, on *Box 1 (rhel)*, you will run an OpenSCAP audit against the
+*CIS Benchmark Level 1 (Server)* profile and learn to read the report.
+
+[IMPORTANT]
+====
+*Stay put* → this module is performed on *Box 1*, the `rhel` terminal to your right.
+====
+
+== Step 1 — Become root
+
+Compliance scanning reads protected configuration across the whole system, so the rest of this
+module is done as `root`. Become root now:
+
+[source,bash,role=execute]
+----
+sudo -i
+----
+
+Move into your working directory for reports:
+
+[source,bash,role=execute]
+----
+cd ~/compliance
+----
+
+== Step 2 — Run the baseline scan
+
+Evaluate the system against the CIS Level 1 Server profile, writing both a machine-readable
+results file and a human-readable HTML report:
+
+[source,bash,role=execute]
+----
+oscap xccdf eval --profile xccdf_org.ssgproject.content_profile_cis_server_l1 --results results-l1-before.xml --report report-l1-before.html /usr/share/xml/scap/ssg/content/ssg-rhel10-ds.xml
+----
+
+[NOTE]
+====
+`oscap` exits with status *2* when one or more rules fail. That is *normal and expected* on an
+un-hardened system — it is a result, not an error. (Only exit status *1* means the tool itself
+failed.)
+====
+
+== Step 3 — Read the summary
+
+Count how many rules passed and failed in the results you just produced:
+
+[source,bash,role=execute]
+----
+echo "pass: $(grep -c '<result>pass</result>' results-l1-before.xml)  fail: $(grep -c '<result>fail</result>' results-l1-before.xml)"
+----
+
+A fresh system typically *fails* a large share of CIS Level 1 — that gap is exactly what
+hardening closes.
+
+== Step 4 — Interpret the HTML report
+
+The HTML report (`report-l1-before.html`) is the auditor-friendly view: each rule shows a
+pass/fail result, a severity, a description, a rationale, and _how to fix it_. Look at a failing
+rule's detail now:
+
+[source,bash,role=execute]
+----
+grep -o 'idref="[^"]*" .*result>fail' results-l1-before.xml | head -n 5
+----
+
+[quote, Sysadmin Grace]
+____
+"That HTML report is your best friend during an audit. Every red row tells you the rule, _why_
+it matters, and the exact remediation. Don't fix these by hand, though — OpenSCAP can apply the
+fixes for you. That's next."
+____
+
+[TIP]
+====
+In a real engagement you would download `report-l1-before.html` and open it in a browser to
+browse the findings interactively. Keep it — in the next module you will generate an "after"
+report and compare the two.
+====
+
+When you understand your baseline, continue to the next module to remediate it.

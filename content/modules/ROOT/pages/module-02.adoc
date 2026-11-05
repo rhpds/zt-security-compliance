@@ -1,0 +1,99 @@
+= Vulnerability & Patch Management
+
+Before you harden _how_ a system is configured, you deal with _what software_ is on it.
+Unpatched packages with known CVEs are the most common way systems get compromised. In this
+module, on *Box 1 (rhel)*, you will enumerate the outstanding security vulnerabilities on the
+system and apply the security patches.
+
+[IMPORTANT]
+====
+*Stay put* → this module is performed on *Box 1*, the `rhel` terminal to your right.
+====
+
+[NOTE]
+====
+*Why not an OpenSCAP OVAL scan?*
+
+On older RHEL you might have scanned for CVEs using an OVAL feed. Red Hat put the OVAL v2 feed
+into maintenance mode and does *not* publish OVAL data for RHEL 10 — the security data now ships
+as CSAF/VEX. On RHEL 10 the supported way to enumerate CVEs and errata on a running host is the
+built-in `dnf updateinfo`, which is backed by the repository `updateinfo` metadata.
+====
+
+== Step 1 — See the big picture
+
+Ask `dnf` for a summary of outstanding advisories, grouped by type and severity:
+
+[source,bash,role=execute]
+----
+sudo dnf updateinfo summary
+----
+
+The *Security* line is what matters most — it tells you how many security advisories apply to
+packages currently installed on this box.
+
+== Step 2 — List outstanding security advisories
+
+Now list the individual security advisories (RHSAs) and the packages they fix:
+
+[source,bash,role=execute]
+----
+sudo dnf updateinfo list --security
+----
+
+The same gap can be viewed as the CVE IDs it closes — handy when an auditor hands you a list of
+CVEs to confirm:
+
+[source,bash,role=execute]
+----
+sudo dnf updateinfo list --cves
+----
+
+== Step 3 — Inspect the detail
+
+Pull the full description, severity, and CVE list for the outstanding security advisories:
+
+[source,bash,role=execute]
+----
+sudo dnf updateinfo info --security
+----
+
+[quote, Manager Bill]
+____
+"CVEs? Just delete them. Can't you `rm` a CVE?"
+____
+
+[quote, Sysadmin Grace]
+____
+"No, Bill. You _patch_ the package that the CVE lives in. `dnf` already knows exactly which
+ones and can do them all in one shot. Watch."
+____
+
+== Step 4 — Apply the security patches
+
+Install *only* the security-relevant updates in a single transaction:
+
+[source,bash,role=execute]
+----
+sudo dnf -y --security update
+----
+
+== Step 5 — Verify the gap is closed
+
+Re-run the security list. It should now be empty — every outstanding security advisory has been
+applied:
+
+[source,bash,role=execute]
+----
+sudo dnf updateinfo list --security
+----
+
+[NOTE]
+====
+Patch management closes _known_ vulnerabilities in your software. *Compliance hardening* — the
+rest of this lab — is the complementary half: it makes sure the system is _configured_ securely
+even when every package is up to date. You need both.
+====
+
+When the security list comes back empty, continue to the next module to start your first
+compliance audit.

@@ -1,0 +1,71 @@
+= Automated Remediation to CIS Level 1
+
+You have measured the gap. Now close it — automatically. In this module, on *Box 1 (rhel)*, you
+will let OpenSCAP apply the CIS Level 1 fixes, then re-scan to prove the system now passes the
+rules it previously failed.
+
+[IMPORTANT]
+====
+*Stay put* → this module is performed on *Box 1*, still in your `root` shell from the previous
+module. If you opened a new terminal, run `sudo -i` and `cd ~/compliance` again.
+====
+
+[quote, Manager Bill]
+____
+"I got a head start and fixed security myself — I set every file in `/etc` to `000`. Nothing can
+read them now, so nothing can hack them! You're welcome."
+____
+
+[quote, Sysadmin Grace]
+____
+"Please don't touch anything, Bill. _This_ is how it's done — a tested, standards-based
+remediation that fixes the right things and leaves the system working."
+____
+
+== Step 1 — Apply CIS Level 1 remediation
+
+Run the scan again, this time with `--remediate`. OpenSCAP evaluates each rule and, for the ones
+that fail, applies the fix:
+
+[source,bash,role=execute]
+----
+oscap xccdf eval --remediate --profile xccdf_org.ssgproject.content_profile_cis_server_l1 --results results-remediate.xml --report report-remediate.html /usr/share/xml/scap/ssg/content/ssg-rhel10-ds.xml
+----
+
+[IMPORTANT]
+====
+This hardens the *rhel* box for real — including requiring a password for `sudo`. That is the
+correct CIS behavior. You are already `root`, so you can finish this module; the remaining lab
+modules all run on *node1*.
+====
+
+== Step 2 — Re-scan to verify
+
+Evaluate the now-hardened system against the same profile and save an "after" report:
+
+[source,bash,role=execute]
+----
+oscap xccdf eval --profile xccdf_org.ssgproject.content_profile_cis_server_l1 --results results-l1-after.xml --report report-l1-after.html /usr/share/xml/scap/ssg/content/ssg-rhel10-ds.xml
+----
+
+== Step 3 — Compare before and after
+
+Look at the failing-rule count before and after remediation:
+
+[source,bash,role=execute]
+----
+echo "before fails: $(grep -c '<result>fail</result>' results-l1-before.xml)  after fails: $(grep -c '<result>fail</result>' results-l1-after.xml)"
+----
+
+The "after" number should be dramatically lower. A handful of rules may still fail — some fixes
+require decisions a tool should not make for you (for example, partitioning), and those are
+expected to remain for manual review.
+
+[NOTE]
+====
+*Measure → remediate → re-measure* is the core compliance loop. You just ran all three steps and
+have the before/after reports to prove it to an auditor.
+====
+
+With Box 1 hardened to CIS Level 1, it is time to meet the stricter Level 2 profile — on Box 2.
+Continue to the next module.

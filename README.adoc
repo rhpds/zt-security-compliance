@@ -1,0 +1,73 @@
+= RHEL 10 Security Compliance: OpenSCAP, CIS Hardening & Compliance-as-Code
+
+A hands-on ZeroTouch lab (`zt-security-compliance`) that walks a participant through automated
+Linux security compliance on Red Hat Enterprise Linux 10 — from vulnerability and patch
+management, through OpenSCAP auditing and CIS hardening, to operational exceptions and
+compliance-as-code. No prior OpenSCAP experience required.
+
+== Audience and objectives
+
+Sysadmins and security-curious learners new to automated compliance. By the end, participants can:
+
+* Enumerate CVEs and security errata with `dnf updateinfo` and apply security patches.
+* Run an OpenSCAP audit against a CIS benchmark and interpret the HTML report.
+* Automatically remediate a system to CIS Level 1 (Server) and verify the result.
+* Explain the difference between CIS Level 1 (standard) and Level 2 (maximum) hardening.
+* Create operational rule exceptions with `autotailor` without editing vendor content.
+* Bake a compliance profile into an OS image blueprint with Red Hat Image Builder.
+
+== Modules
+
+[cols="1,3,1,3",options="header"]
+|===
+| # | Module | Box | What the participant does
+
+| 01 | About This Lab | rhel | Reads the scenario, confirms the toolchain and CIS profiles
+| 02 | Vulnerability & Patch Management | rhel | `dnf updateinfo` to list CVEs/errata; `dnf --security update`
+| 03 | Baseline Compliance Audit | rhel | Scans out-of-box system at CIS L1; reads the report
+| 04 | Automated Remediation | rhel | `oscap ... --remediate` to CIS L1; re-scans; compares before/after
+| 05 | Standard vs. Maximum | node1 | Audits a fresh box at CIS L2; contrasts rule counts with L1
+| 06 | Operational Exceptions | node1 | `autotailor` to waive one rule via a tailoring file
+| 07 | Compliance-as-Code | node1 | Image Builder blueprint with CIS L1 baked in
+|===
+
+Each module ships a `solve-{host}.sh` (all participant commands) and a `validation-{host}.sh`
+(pass/fail with actionable hints) under `runtime-automation/module-NN/`. Modules 01–04 run on
+`rhel` (`*-rhel.sh`); modules 05–07 run on `node1` (`*-node1.sh`).
+
+== Lab environment
+
+Two RHEL 10 VMs, both in the `bastions` group:
+
+* *rhel* (Box 1) — the bastion the participant uses (the terminal is logged in here as `rhel`).
+  Modules 2–4 harden this box to CIS Level 1.
+* *node1* (Box 2) — a fresh server reached with `ssh node1`. Modules 5–7 run here.
+
+Users `rhel` and `root` exist on both; `rhel` has passwordless sudo. A throwaway, lab-only SSH
+keypair (embedded in the setup scripts) lets `rhel` and `root` on the bastion reach `node1`.
+
+Image: `rhel-10-1-04-15-26`. The OpenSCAP toolchain (`openscap-scanner`, `scap-security-guide`,
+`openscap-utils`) is installed on both VMs; `node1` additionally has `osbuild-composer` and
+`composer-cli` for the Image Builder module.
+
+[NOTE]
+====
+*CIS remediation hardens the live `rhel` box (module 4), including requiring a password for
+`sudo`.* This is expected and correct CIS behavior. Participants become `root` (`sudo -i`) before
+hardening, and all solve/validation scripts run as `root` via Ansible `become`, so nothing
+depends on the `rhel` user's passwordless sudo surviving remediation. All subsequent modules run
+on `node1`, which is intentionally left un-hardened.
+====
+
+== Key profile IDs
+
+* CIS Level 1 Server: `xccdf_org.ssgproject.content_profile_cis_server_l1`
+* CIS Level 2 Server: `xccdf_org.ssgproject.content_profile_cis`
+* Datastream: `/usr/share/xml/scap/ssg/content/ssg-rhel10-ds.xml`
+
+== Authoring notes
+
+* On RHEL 10 there is no OVAL vulnerability feed; CVE/errata enumeration uses `dnf updateinfo`.
+* `oscap xccdf eval` exits `2` when rules fail (normal); scripts treat only exit `1` as an error.
+* Module-07 validation checks the blueprint and its OpenSCAP customization, not a completed
+  (slow) image build, so it passes even where content repositories are unavailable.

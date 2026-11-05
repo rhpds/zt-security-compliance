@@ -1,0 +1,122 @@
+= Welcome to RHEL 10 Security Compliance
+:toc:
+:icons: font
+:experimental:
+
+## Step 1: About This Lab
+
+== Objective
+
+By the end of this guided lab exercise, you will be able to:
+
+* Enumerate outstanding CVEs and security errata on RHEL 10 and apply security patches.
+* Run an OpenSCAP audit against a CIS benchmark and interpret the compliance report.
+* Automatically remediate a system to *CIS Level 1 (Server)* and verify the result.
+* Explain the difference between *standard* hardening (Level 1) and *maximum* lockdown (Level 2).
+* Create operational rule exceptions with `autotailor` without editing vendor content.
+* Bake a compliance profile into an OS image blueprint with *Red Hat Image Builder*.
+
+== Introduction
+
+Security compliance is how enterprises prove — to auditors, to customers, and to themselves —
+that their systems are configured safely. Doing it by hand across a fleet is impossible; doing
+it _automatically_ and _repeatably_ is the job. Red Hat Enterprise Linux 10 ships the tooling
+to measure a system against an industry benchmark, fix what fails, manage the exceptions every
+real organization needs, and prevent *security drift* by building compliance into images from
+day one.
+
+In this lab you play the newest administrator at *Super-Business*, a company whose middle
+manager, *Manager Bill*, has strong opinions about security and a weak memory of how any of it
+works. Luckily, *Sysadmin Grace* — who has been cleaning up after Bill for years — is around
+to point you in the right direction.
+
+[quote, Manager Bill]
+____
+"Security is simple, people. I read a blog once. Just turn on _all_ the security and we're
+compliant. Make it happen by end of day."
+____
+
+[quote, Sysadmin Grace]
+____
+"...and _that_ is why we measure first, fix with automation, document our exceptions, and bake
+it into the image. Ignore the 'all the security' part. Follow me."
+____
+
+=== Lab Modules
+
+. *About This Lab* — You are here: compliance, the toolchain, and the environment.
+. *Vulnerability & Patch Management* — Enumerate CVEs/errata with `dnf updateinfo`; apply security patches.
+. *Baseline Compliance Audit* — Scan an out-of-the-box system against *CIS Level 1* with OpenSCAP.
+. *Automated Remediation* — Remediate to CIS Level 1 and re-scan to prove it worked.
+. *Standard vs. Maximum* — Audit *CIS Level 2* on `node1` and contrast it with Level 1.
+. *Operational Exceptions* — Use `autotailor` to waive a rule without touching vendor files.
+. *Compliance-as-Code* — Bake CIS Level 1 into an image blueprint with Red Hat Image Builder.
+
+== Lab Environment
+
+As part of this lab you will have access to 2 machines:
+
+* *rhel* — your bastion (Box 1). The terminal to your right is logged in here as `rhel`.
+* *node1* — a second server (Box 2) you reach over SSH with `ssh node1`.
+
+* *Operating System*: Red Hat Enterprise Linux 10
+* *Estimated Time*: Approximately 45–60 minutes
+
+Modules 2–4 are performed on *rhel* (Box 1). Modules 5–7 are performed on *node1* (Box 2).
+
+=== Environment Diagram
+
+[source,text]
+----
+                             Lab Environment
+    ┌────────────────────────────────────────────────────────────────┐
+    │                                                                  │
+    │   ┌──────────────┐              ssh node1          ┌───────────┐ │
+    │   │   Box 1       │ ──────────────────────────────▶│   Box 2   │ │
+    │   │    rhel       │   audit → patch → remediate     │   node1   │ │
+    │   │  (bastion)    │                                 │ L2 / tailor│ │
+    │   └──────────────┘                                 │ / imagebld │ │
+    │                                                     └───────────┘ │
+    └────────────────────────────────────────────────────────────────┘
+----
+
+You have these accounts on both machines:
+
+*rhel* → users `rhel` and `root` +
+*node1* → users `rhel` and `root`
+
+[NOTE]
+====
+*Lab Note: If Using Red Hat Demo System (RHPDS)*
+
+The terminal window to your right is already logged into the lab environment as the `rhel`
+user on the *rhel* bastion via SSH. You will reach *node1* by running `ssh node1`.
+
+Each command is shown in a small box. In its upper-right corner are a *copy* icon (clipboard)
+and a *run* icon (terminal). Click the terminal icon to auto-type and run the command, or click
+the clipboard icon to copy it and paste with the middle mouse button (keyboard `Ctrl+C` /
+`Ctrl+V` do not work in this terminal).
+
+To move to the next step, click the *Next* button.
+====
+
+== Confirm the toolchain
+
+First, confirm you are on RHEL 10 with the OpenSCAP scanner installed:
+
+[source,bash,role=execute]
+----
+oscap --version
+----
+
+Now list the CIS profiles shipped in the RHEL 10 SCAP Security Guide content:
+
+[source,bash,role=execute]
+----
+oscap info --profiles /usr/share/xml/scap/ssg/content/ssg-rhel10-ds.xml | grep -i cis
+----
+
+You should see several, including `...cis_server_l1` (Level 1 Server) and `...cis` (Level 2
+Server). These profile IDs are what you will scan against throughout the lab.
+
+When you are ready, continue to the next module to start measuring.

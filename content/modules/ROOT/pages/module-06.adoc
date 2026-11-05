@@ -1,0 +1,69 @@
+= Operational Exceptions with autotailor
+
+No benchmark fits every organization perfectly. Sooner or later a rule conflicts with a
+legitimate business need, and you must *waive* it — on purpose, documented, and without editing
+the vendor's content (so updates to the benchmark keep flowing). The tool for this is
+`autotailor`, which produces a *tailoring file*: a small overlay that derives a custom profile
+from a vendor profile. In this module, on *Box 2 (node1)*, you will waive one rule the right way.
+
+[IMPORTANT]
+====
+*Stay put* → this module is performed on *Box 2 (node1)*, still in your `root` shell. If you
+opened a new session, run `ssh node1`, then `sudo -i`, then `cd ~/compliance`.
+====
+
+[quote, Sysadmin Grace]
+____
+"Our admins run long jobs on the console, and the CIS shell idle-timeout rule keeps logging them
+out mid-task. We have a compensating control, so we're waiving that one rule — but we are *not*
+hacking the vendor datastream to do it. We tailor."
+____
+
+== Step 1 — Create a tailoring file
+
+Use `autotailor` to derive a new profile, `cis_server_l1_custom`, from CIS Level 1 that
+*unselects* the shell idle-timeout rule (`accounts_tmout`). The last two arguments are the vendor
+datastream and the base profile to extend:
+
+[source,bash,role=execute]
+----
+autotailor --output tailoring-cis-l1-custom.xml --new-profile-id xccdf_org.ssgproject.content_profile_cis_server_l1_custom --title "CIS L1 Server - Super-Business custom" --unselect xccdf_org.ssgproject.content_rule_accounts_tmout /usr/share/xml/scap/ssg/content/ssg-rhel10-ds.xml xccdf_org.ssgproject.content_profile_cis_server_l1
+----
+
+== Step 2 — Confirm the exception lives only in the tailoring file
+
+The override is recorded in your small tailoring file — the vendor datastream is untouched. See
+the rule marked unselected:
+
+[source,bash,role=execute]
+----
+grep -A1 accounts_tmout tailoring-cis-l1-custom.xml
+----
+
+You should see the rule with `selected="false"`. That is your documented, portable exception.
+
+== Step 3 — Scan with the custom profile
+
+Run an audit using your custom profile by pointing `oscap` at the tailoring file. The waived rule
+is no longer evaluated:
+
+[source,bash,role=execute]
+----
+oscap xccdf eval --profile xccdf_org.ssgproject.content_profile_cis_server_l1_custom --tailoring-file tailoring-cis-l1-custom.xml --results results-custom.xml --report report-custom.html /usr/share/xml/scap/ssg/content/ssg-rhel10-ds.xml
+----
+
+[NOTE]
+====
+Because the exception is a separate file, when Red Hat ships an updated `scap-security-guide`,
+you simply get the new rules automatically — your tailoring overlay keeps applying cleanly on top.
+Editing the vendor datastream directly would throw that away on the next package update.
+====
+
+[TIP]
+====
+`autotailor` can do more than unselect rules: `--select` re-enables a rule, and `--var-value`
+changes a rule's parameter (for example, setting a different minimum password length). The
+tailoring file is the single, reviewable home for every one of your deviations.
+====
+
+One piece remains: making sure _new_ systems are born compliant. Continue to the final module.

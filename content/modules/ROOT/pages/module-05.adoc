@@ -1,0 +1,86 @@
+= Standard vs. Maximum: CIS Level 2
+
+CIS benchmarks come in two levels. *Level 1* is essential, broadly-safe hardening suitable for
+most systems. *Level 2* is maximum-security "defense in depth" for high-sensitivity environments
+— stricter, and more likely to break applications. In this module you move to *Box 2 (node1)*, a
+_fresh, un-hardened_ system, and audit it at Level 2 to see how much more it asks for.
+
+[IMPORTANT]
+====
+*Switch boxes* → connect from `rhel` to the second server, `node1`:
+====
+
+[source,bash,role=execute]
+----
+ssh node1
+----
+
+If prompted to accept node1's host key, type `yes`. Confirm you landed on node1:
+
+[source,bash,role=execute]
+----
+hostname
+----
+
+Become root and move into your working directory:
+
+[source,bash,role=execute]
+----
+sudo -i
+----
+
+[source,bash,role=execute]
+----
+cd ~/compliance
+----
+
+== Step 1 — Audit node1 at CIS Level 1 (for comparison)
+
+First, scan this fresh box at *Level 1* so you have a baseline to compare against:
+
+[source,bash,role=execute]
+----
+oscap xccdf eval --profile xccdf_org.ssgproject.content_profile_cis_server_l1 --results results-l1-node1.xml --report report-l1-node1.html /usr/share/xml/scap/ssg/content/ssg-rhel10-ds.xml
+----
+
+== Step 2 — Audit node1 at CIS Level 2
+
+Now scan the same box at *Level 2* — note the different profile ID (`...content_profile_cis`,
+with no `_server_l1` suffix, is the Level 2 Server profile):
+
+[source,bash,role=execute]
+----
+oscap xccdf eval --profile xccdf_org.ssgproject.content_profile_cis --results results-l2.xml --report report-l2.html /usr/share/xml/scap/ssg/content/ssg-rhel10-ds.xml
+----
+
+== Step 3 — Compare how much each level evaluates
+
+Count the number of rules each profile evaluated:
+
+[source,bash,role=execute]
+----
+echo "L1 rules: $(grep -c '<rule-result' results-l1-node1.xml)   L2 rules: $(grep -c '<rule-result' results-l2.xml)"
+----
+
+Level 2 evaluates *more* rules — it layers additional controls (stricter auditing, more
+aggressive service and module restrictions, tighter mount options) on top of Level 1.
+
+[quote, Manager Bill]
+____
+"Level 2 has more rules?! Put Level 2 on _everything_. More is better. Maximum security!"
+____
+
+[quote, Sysadmin Grace]
+____
+"Careful. Level 2 can break real workloads — it's for the crown-jewel systems, not the whole
+fleet. And even on those, you'll always need a few documented *exceptions*. Let me show you the
+right way to make one."
+____
+
+[NOTE]
+====
+The lesson here is _judgment_, not "bigger number wins." Match the level to the system's risk,
+and expect to tailor either level to your environment — which is exactly the next module.
+====
+
+Stay on node1 and continue to the next module.
