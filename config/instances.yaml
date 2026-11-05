@@ -8,7 +8,7 @@ virtualmachines:
     image_size: "40G"
     tags:
       - key: "AnsibleGroup"
-        value: "bastions"
+        value: "nodes"
     networks:
       - default
     packages:
@@ -20,10 +20,10 @@ virtualmachines:
     bootloader: efi
     memory: "8G"
     cores: 2
-    image_size: "80G"
+    image_size: "40G"
     tags:
       - key: "AnsibleGroup"
-        value: "bastions"
+        value: "nodes"
     networks:
       - default
     packages:
