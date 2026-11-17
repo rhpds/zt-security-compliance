@@ -1,1 +1,7 @@
-* xref:index.adoc[Lab Overview]
+* xref:module-01.adoc[Welcome to RHEL 10 Security Compliance]
+* xref:module-02.adoc[Vulnerability & Patch Management]
+* xref:module-03.adoc[Baseline Compliance Audit (CIS Level 1)]
+* xref:module-04.adoc[Automated Remediation to CIS Level 1]
+* xref:module-05.adoc[Standard vs. Maximum: CIS Level 2]
+* xref:module-06.adoc[Operational Exceptions with autotailor]
+* xref:module-07.adoc[Compliance-as-Code with Image Builder]
