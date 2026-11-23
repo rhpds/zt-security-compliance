@@ -1,4 +1,4 @@
-= Automated Remediation to CIS Level 1
+= Step 4 Automated Remediation to CIS Level 1
 
 You have measured the gap. Now close it — automatically. In this module, on *Box 1 (rhel)*, you
 will let OpenSCAP apply the CIS Level 1 fixes, then re-scan to prove the system now passes the

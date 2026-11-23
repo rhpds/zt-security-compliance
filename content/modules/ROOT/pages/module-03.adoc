@@ -1,4 +1,4 @@
-= Baseline Compliance Audit (CIS Level 1)
+= Step 3 Baseline Compliance Audit (CIS Level 1)
 
 How secure is this system _right now_, straight out of the box? You cannot improve what you do
 not measure. In this module, on *Box 1 (rhel)*, you will run an OpenSCAP audit against the
@@ -11,12 +11,18 @@ not measure. In this module, on *Box 1 (rhel)*, you will run an OpenSCAP audit a
 
 == Step 1 — Become root
 
-Compliance scanning reads protected configuration across the whole system, so the rest of this
-module is done as `root`. Become root now:
+Compliance scanning inspects protected configuration across the entire system. 
+Elevate your privileges so you can make the necessary changes throughout the rest of this module.
 
 [source,bash,role=execute]
 ----
-sudo -i
+sudo su
+----
+
+Password:
+[source,bash,subs="+macros,+attributes",role=execute]
+----
+{bastion_ssh_password}
 ----
 
 Move into your working directory for reports:

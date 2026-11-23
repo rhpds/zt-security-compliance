@@ -1,4 +1,4 @@
-= Standard vs. Maximum: CIS Level 2
+= Step 5 Standard vs. Maximum: CIS Level 2
 
 CIS benchmarks come in two levels. *Level 1* is essential, broadly-safe hardening suitable for
 most systems. *Level 2* is maximum-security "defense in depth" for high-sensitivity environments

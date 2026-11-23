@@ -1,4 +1,4 @@
-= Compliance-as-Code with Image Builder
+= Step 7 Compliance-as-Code with Image Builder
 
 Hardening a _running_ system is reactive — every new VM starts non-compliant and drifts until
 someone remediates it. The proactive answer is to *bake compliance into the image itself*, so

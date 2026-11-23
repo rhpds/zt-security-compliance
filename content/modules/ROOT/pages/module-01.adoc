@@ -3,7 +3,7 @@
 :icons: font
 :experimental:
 
-## Step 1: About This Lab
+= Step 1 About This Lab
 
 == Objective
 
@@ -69,21 +69,33 @@ Modules 2–4 are performed on *rhel* (Box 1). Modules 5–7 are performed on *n
 [source,text]
 ----
                              Lab Environment
-    ┌────────────────────────────────────────────────────────────────┐
-    │                                                                  │
-    │   ┌──────────────┐              ssh node1          ┌───────────┐ │
-    │   │   Box 1       │ ──────────────────────────────▶│   Box 2   │ │
-    │   │    rhel       │   audit → patch → remediate     │   node1   │ │
-    │   │  (bastion)    │                                 │ L2 / tailor│ │
-    │   └──────────────┘                                 │ / imagebld │ │
-    │                                                     └───────────┘ │
-    └────────────────────────────────────────────────────────────────┘
+    ┌──────────────────────────────────────────────────────┐
+    │                                                      │
+    │   ┌──────────────┐     ssh node1       ┌───────────┐ │
+    │   │   Box 1      │ ──────────────────▶│   Box 2   │ │
+    │   │    rhel      │                     │   node1   │ │
+    │   │  (bastion)   │                     │   tailor  │ │
+    │   └──────────────┘                     │  imagebld │ │
+    │                                        └───────────┘ │
+    └──────────────────────────────────────────────────────┘
 ----
 
 You have these accounts on both machines:
 
 *rhel* → users `rhel` and `root` +
 *node1* → users `rhel` and `root`
+
+Username:
+[source,bash]
+----
+rhel
+----
+
+Password:
+[source,bash,subs="+macros,+attributes",role=execute]
+----
+{bastion_ssh_password}
+----
 
 [NOTE]
 ====
@@ -100,14 +112,26 @@ the clipboard icon to copy it and paste with the middle mouse button (keyboard `
 To move to the next step, click the *Next* button.
 ====
 
-== Confirm the toolchain
+== Step 1.1 Install the needed dependencies
 
-First, confirm you are on RHEL 10 with the OpenSCAP scanner installed:
+On a default RHEL install you will need to make sure to install your dependencies.
+
+
+[source,bash,role=execute]
+----
+sudo yum install openscap-scanner scap-security-guide openscap-utils -y
+----
+
+== Step 1.2 Confirm the toolchain
+
+Confirm you are on RHEL 10 with the OpenSCAP scanner installed:
 
 [source,bash,role=execute]
 ----
 oscap --version
 ----
+
+== Step 1.3 CIS profiles
 
 Now list the CIS profiles shipped in the RHEL 10 SCAP Security Guide content:
 

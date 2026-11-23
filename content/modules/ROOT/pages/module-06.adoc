@@ -1,4 +1,4 @@
-= Operational Exceptions with autotailor
+= Step 6 Operational Exceptions with autotailor
 
 No benchmark fits every organization perfectly. Sooner or later a rule conflicts with a
 legitimate business need, and you must *waive* it — on purpose, documented, and without editing

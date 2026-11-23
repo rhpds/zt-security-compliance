@@ -1,4 +1,4 @@
-= Vulnerability & Patch Management
+= Step 2 Vulnerability & Patch Management
 
 Before you harden _how_ a system is configured, you deal with _what software_ is on it.
 Unpatched packages with known CVEs are the most common way systems get compromised. In this
@@ -20,7 +20,7 @@ as CSAF/VEX. On RHEL 10 the supported way to enumerate CVEs and errata on a runn
 built-in `dnf updateinfo`, which is backed by the repository `updateinfo` metadata.
 ====
 
-== Step 1 — See the big picture
+== Step 2.1 — See the big picture
 
 Ask `dnf` for a summary of outstanding advisories, grouped by type and severity:
 
@@ -32,7 +32,7 @@ sudo dnf updateinfo summary
 The *Security* line is what matters most — it tells you how many security advisories apply to
 packages currently installed on this box.
 
-== Step 2 — List outstanding security advisories
+== Step 2.2 — List outstanding security advisories (RHSAs)
 
 Now list the individual security advisories (RHSAs) and the packages they fix:
 
@@ -40,6 +40,8 @@ Now list the individual security advisories (RHSAs) and the packages they fix:
 ----
 sudo dnf updateinfo list --security
 ----
+
+== Step 2.3 — List outstanding security CVE IDs
 
 The same gap can be viewed as the CVE IDs it closes — handy when an auditor hands you a list of
 CVEs to confirm:
@@ -49,7 +51,7 @@ CVEs to confirm:
 sudo dnf updateinfo list --cves
 ----
 
-== Step 3 — Inspect the detail
+== Step 2.4 — Inspect the detail
 
 Pull the full description, severity, and CVE list for the outstanding security advisories:
 
@@ -69,7 +71,7 @@ ____
 ones and can do them all in one shot. Watch."
 ____
 
-== Step 4 — Apply the security patches
+== Step 2.5 — Apply the security patches
 
 Install *only* the security-relevant updates in a single transaction:
 
@@ -78,7 +80,7 @@ Install *only* the security-relevant updates in a single transaction:
 sudo dnf -y --security update
 ----
 
-== Step 5 — Verify the gap is closed
+== Step 2.6 — Verify the gap is closed
 
 Re-run the security list. It should now be empty — every outstanding security advisory has been
 applied:
