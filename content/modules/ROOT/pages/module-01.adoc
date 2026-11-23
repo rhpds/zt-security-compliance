@@ -68,16 +68,16 @@ Modules 2–4 are performed on *rhel* (Box 1). Modules 5–7 are performed on *n
 
 [source,text]
 ----
-                             Lab Environment
-    ┌──────────────────────────────────────────────────────┐
-    │                                                      │
-    │   ┌──────────────┐     ssh node1       ┌───────────┐ │
-    │   │   Box 1      │ ──────────────────▶│   Box 2   │ │
-    │   │    rhel      │                     │   node1   │ │
-    │   │  (bastion)   │                     │   tailor  │ │
-    │   └──────────────┘                     │  imagebld │ │
-    │                                        └───────────┘ │
-    └──────────────────────────────────────────────────────┘
+                     Lab Environment
+┌──────────────────────────────────────────────────────┐
+│                                                      │
+│   ┌──────────────┐     ssh node1       ┌───────────┐ │
+│   │   Box 1      │ ──────────────────▶ │   Box 2   │ │
+│   │    rhel      │                     │   node1   │ │
+│   │  (bastion)   │                     │   tailor  │ │
+│   └──────────────┘                     │  imagebld │ │
+│                                        └───────────┘ │
+└──────────────────────────────────────────────────────┘
 ----
 
 You have these accounts on both machines:
@@ -142,5 +142,28 @@ oscap info --profiles /usr/share/xml/scap/ssg/content/ssg-rhel10-ds.xml | grep -
 
 You should see several, including `...cis_server_l1` (Level 1 Server) and `...cis` (Level 2
 Server). These profile IDs are what you will scan against throughout the lab.
+
+== Step 1.3 Other Hardening profiles
+
+Run oscap info against your OS's SCAP datastream file (typically stored in /usr/share/xml/scap/ssg/content/) to list all valid profile IDs—such as DISA STIG, PCI-DSS, HIPAA, or ANSSI.
+
+[source,bash,role=execute]
+----
+oscap info --profiles /usr/share/xml/scap/ssg/content/ssg-rhel10-ds.xml
+----
+
+Look under the Profiles section in the output for the exact ID string you need, for example:
+
+* CIS Benchmark: xccdf_org.ssgproject.content_profile_cis
+
+* DISA STIG: xccdf_org.ssgproject.content_profile_stig
+
+* PCI-DSS: xccdf_org.ssgproject.content_profile_pci-dss
+
+* HIPAA: xccdf_org.ssgproject.content_profile_hipaa
+
+
+You can then subsitute the CIS Profiles for your needed hardening standard, but for this guide we will focus on CIS.
+
 
 When you are ready, continue to the next module to start measuring.

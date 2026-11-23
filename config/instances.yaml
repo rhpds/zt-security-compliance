@@ -15,12 +15,13 @@ virtualmachines:
       - git
       - cockpit
       - tmux
+      - vim 
 
   - name: "node1"
     image: "rhel-10-2-eus-06-08-26"
     bootloader: efi
-    memory: "4G"
-    cores: 1
+    memory: "8G"
+    cores: 2
     image_size: "40G"
     tags:
       - key: "AnsibleGroup"
@@ -31,4 +32,7 @@ virtualmachines:
       - git
       - cockpit
       - tmux
+      - openscap-scanner 
+      - scap-security-guide 
+      - openscap-utils
 

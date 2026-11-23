@@ -40,5 +40,36 @@ systemctl enable --now sshd
 # participant's first `composer-cli` call works without a cold-start wait.
 systemctl enable --now osbuild-composer.socket
 
+# The Lab environment is connected to an internal Red Hat Demo Platform Satellite server (demosat-ha.infra.demo.redhat.com) using Red Hat Subscription Manager (rhsm) certificates, rather than cdn.redhat.com.
+# Run these commands to write the exact repository override file pointing to your lab's Satellite URLs \
+# (keeping "rhsm": true so osbuild-composer uses your existing Satellite entitlement certificates).
+
+mkdir -p /etc/osbuild-composer/repositories
+
+cat > /etc/osbuild-composer/repositories/rhel-10.1.json << 'EOF'
+{
+  "x86_64": [
+    {
+      "name": "baseos",
+      "baseurl": "https://demosat-ha.infra.demo.redhat.com/pulp/repos/Red_Hat_RHDP_Labs/Library/zt-rhelbu/content/dist/rhel10/10/x86_64/baseos/os",
+      "rhsm": true,
+      "check_gpg": false
+    },
+    {
+      "name": "appstream",
+      "baseurl": "https://demosat-ha.infra.demo.redhat.com/pulp/repos/Red_Hat_RHDP_Labs/Library/zt-rhelbu/content/dist/rhel10/10/x86_64/appstream/os",
+      "rhsm": true,
+      "check_gpg": false
+    },
+    {
+      "name": "codeready-builder",
+      "baseurl": "https://demosat-ha.infra.demo.redhat.com/pulp/repos/Red_Hat_RHDP_Labs/Library/zt-rhelbu/content/dist/rhel10/10/x86_64/codeready-builder/os",
+      "rhsm": true,
+      "check_gpg": false
+    }
+  ]
+}
+EOF
+
 echo "Lab setup complete" >> /tmp/progress.log
 exit 0

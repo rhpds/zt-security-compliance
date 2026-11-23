@@ -19,7 +19,7 @@ out mid-task. We have a compensating control, so we're waiving that one rule —
 hacking the vendor datastream to do it. We tailor."
 ____
 
-== Step 1 — Create a tailoring file
+== Step 6.1 — Create a tailoring file
 
 Use `autotailor` to derive a new profile, `cis_server_l1_custom`, from CIS Level 1 that
 *unselects* the shell idle-timeout rule (`accounts_tmout`). The last two arguments are the vendor
@@ -30,7 +30,7 @@ datastream and the base profile to extend:
 autotailor --output tailoring-cis-l1-custom.xml --new-profile-id xccdf_org.ssgproject.content_profile_cis_server_l1_custom --title "CIS L1 Server - Super-Business custom" --unselect xccdf_org.ssgproject.content_rule_accounts_tmout /usr/share/xml/scap/ssg/content/ssg-rhel10-ds.xml xccdf_org.ssgproject.content_profile_cis_server_l1
 ----
 
-== Step 2 — Confirm the exception lives only in the tailoring file
+== Step 6.2 — Confirm the exception lives only in the tailoring file
 
 The override is recorded in your small tailoring file — the vendor datastream is untouched. See
 the rule marked unselected:
@@ -42,7 +42,7 @@ grep -A1 accounts_tmout tailoring-cis-l1-custom.xml
 
 You should see the rule with `selected="false"`. That is your documented, portable exception.
 
-== Step 3 — Scan with the custom profile
+== Step 6.3 — Scan with the custom profile
 
 Run an audit using your custom profile by pointing `oscap` at the tailoring file. The waived rule
 is no longer evaluated:

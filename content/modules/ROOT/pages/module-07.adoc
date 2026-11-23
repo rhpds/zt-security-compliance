@@ -24,7 +24,39 @@ ____
 Level 1. That's compliance-as-code — and it's how you stop security drift before it starts."
 ____
 
-== Step 1 — Write the blueprint
+== Step 7.1 Install and enable required software for image builder.
+
+As the final step in this lab, you will apply what you've learned about OpenSCAP compliance profiles to build a pre-hardened golden image using Image Builder. 
+Before you begin, the required software must be installed on the system—specifically, 
+the composer-cli package, which provides the command-line interface, and the osbuild-composer package, which runs the back-end service responsible for assembling your hardened machine images.
+
+[source,bash,role=execute]
+----
+dnf install -y composer-cli osbuild-composer -y
+----
+
+== Step 7.2 Enable services for image builder.
+
+Now that the software is installed, activate the osbuild-composer service. 
+Enabling this service allows composer-cli to communicate with the build engine that will queue, harden, and package your virtual machine images.
+
+[source,bash,role=execute]
+----
+systemctl enable --now osbuild-composer.socket
+----
+
+== Step 7.3 Verify services for image builder.
+
+Let's verify the service is now running.
+
+[source,bash,role=execute]
+----
+ls -l /run/weldr/api.socket && systemctl status osbuild-composer.socket
+----
+
+With the service active and accessible, you are ready to define a blueprint with your chosen OpenSCAP security profile and build a pre-hardened machine image ready for deployment.
+
+== Step 7.4 — Write the blueprint
 
 Create a blueprint that bakes the *CIS Level 1 (Server)* profile into the image via a
 `[customizations.openscap]` section:
@@ -35,6 +67,7 @@ cat > blueprint.toml << 'EOF'
 name = "hardened-rhel10"
 description = "RHEL 10 image with CIS Level 1 (Server) baked in"
 version = "0.0.1"
+distro = "rhel-10.1"
 
 [customizations.openscap]
 datastream = "/usr/share/xml/scap/ssg/content/ssg-rhel10-ds.xml"
@@ -42,12 +75,14 @@ profile_id = "xccdf_org.ssgproject.content_profile_cis_server_l1"
 EOF
 ----
 
-== Step 2 — Push the blueprint to Image Builder
+== Step 7.5 — Push the blueprint to Image Builder
 
 [source,bash,role=execute]
 ----
 composer-cli blueprints push blueprint.toml
 ----
+
+== Step 7.6 - Show the blueprint to Image Builder
 
 Confirm it was accepted and that the compliance customization is part of it:
 
@@ -58,7 +93,7 @@ composer-cli blueprints show hardened-rhel10
 
 You should see your `[customizations.openscap]` block with the CIS Level 1 `profile_id`.
 
-== Step 3 — Depsolve the blueprint
+== Step 7.7 — Depsolve the blueprint
 
 Resolve all packages the image will contain (Image Builder pulls in the components the profile
 needs):
@@ -68,7 +103,7 @@ needs):
 composer-cli blueprints depsolve hardened-rhel10
 ----
 
-== Step 4 — Start a compliant image build
+== Step 7.8 — Start a compliant image build
 
 Kick off a `qcow2` image build from the blueprint. The build runs in the background and can take
 several minutes — you do *not* need to wait for it to finish for this lab:
@@ -77,6 +112,8 @@ several minutes — you do *not* need to wait for it to finish for this lab:
 ----
 composer-cli compose start hardened-rhel10 qcow2
 ----
+
+== Step 7.9 Check to see if the VM is running
 
 Check its progress:
 
@@ -105,3 +142,7 @@ ____
 You have completed the *RHEL 10 Security Compliance* lab. You can now measure a system against a
 CIS benchmark, apply automated remediation, manage exceptions with `autotailor`, and prevent
 drift with compliance-as-code in Image Builder.
+
+There are other labs on Image Builder and other Security Topics at labs.redhat.com 
+
+

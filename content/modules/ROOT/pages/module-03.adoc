@@ -9,7 +9,7 @@ not measure. In this module, on *Box 1 (rhel)*, you will run an OpenSCAP audit a
 *Stay put* → this module is performed on *Box 1*, the `rhel` terminal to your right.
 ====
 
-== Step 1 — Become root
+== Step 3.1 — Become root
 
 Compliance scanning inspects protected configuration across the entire system. 
 Elevate your privileges so you can make the necessary changes throughout the rest of this module.
@@ -19,11 +19,7 @@ Elevate your privileges so you can make the necessary changes throughout the res
 sudo su
 ----
 
-Password:
-[source,bash,subs="+macros,+attributes",role=execute]
-----
-{bastion_ssh_password}
-----
+== Step 3.2 — Compliance working directory
 
 Move into your working directory for reports:
 
@@ -32,7 +28,7 @@ Move into your working directory for reports:
 cd ~/compliance
 ----
 
-== Step 2 — Run the baseline scan
+== Step 3.3 — Run the baseline scan
 
 Evaluate the system against the CIS Level 1 Server profile, writing both a machine-readable
 results file and a human-readable HTML report:
@@ -49,7 +45,7 @@ un-hardened system — it is a result, not an error. (Only exit status *1* means
 failed.)
 ====
 
-== Step 3 — Read the summary
+== Step 3.4 — Read the summary
 
 Count how many rules passed and failed in the results you just produced:
 
@@ -61,7 +57,7 @@ echo "pass: $(grep -c '<result>pass</result>' results-l1-before.xml)  fail: $(gr
 A fresh system typically *fails* a large share of CIS Level 1 — that gap is exactly what
 hardening closes.
 
-== Step 4 — Interpret the HTML report
+== Step 3.5 — Interpret the HTML report
 
 The HTML report (`report-l1-before.html`) is the auditor-friendly view: each rule shows a
 pass/fail result, a severity, a description, a rationale, and _how to fix it_. Look at a failing
