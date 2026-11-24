@@ -33,6 +33,8 @@ authorize_key() {
 authorize_key /home/rhel rhel:rhel
 authorize_key /root root:root
 
+dnf install composer-cli osbuild-composer -y
+
 systemctl enable --now sshd
 
 # --- Red Hat Image Builder (osbuild-composer) for module-07 ---
@@ -70,6 +72,9 @@ cat > /etc/osbuild-composer/repositories/rhel-10.1.json << 'EOF'
   ]
 }
 EOF
+
+dnf remove composer-cli osbuild-composer -y
+
 
 echo "Lab setup complete" >> /tmp/progress.log
 exit 0

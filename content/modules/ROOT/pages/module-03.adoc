@@ -65,8 +65,12 @@ rule's detail now:
 
 [source,bash,role=execute]
 ----
-grep -o 'idref="[^"]*" .*result>fail' results-l1-before.xml | head -n 5
+lynx report-l1-before.html
 ----
+
+You can use your arrows to scroll down and see the results.
+
+When you are ready to move on you can close it with a CTRL + C on your keyboard.
 
 [quote, Sysadmin Grace]
 ____

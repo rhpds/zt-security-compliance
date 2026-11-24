@@ -2,12 +2,15 @@
 
 Before you harden _how_ a system is configured, you deal with _what software_ is on it.
 Unpatched packages with known CVEs are the most common way systems get compromised. In this
-module, on *Box 1 (rhel)*, you will enumerate the outstanding security vulnerabilities on the
-system and apply the security patches.
+module, you will walk through how to enumerate outstanding security vulnerabilities on a RHEL 10
+host and apply the security patches.
 
 [IMPORTANT]
 ====
-*Stay put* → this module is performed on *Box 1*, the `rhel` terminal to your right.
+*Read-Only Walkthrough* → Do *not* run these commands in the terminal. This lab sandbox uses an
+isolated environment without live Red Hat CDN errata metadata, so `dnf updateinfo` will return
+empty or fail to reach a repository. Review the commands and sample outputs below to see how this
+workflow looks on a subscribed RHEL 10 host before moving to the next module.
 ====
 
 [NOTE]
@@ -24,9 +27,23 @@ built-in `dnf updateinfo`, which is backed by the repository `updateinfo` metada
 
 Ask `dnf` for a summary of outstanding advisories, grouped by type and severity:
 
-[source,bash,role=execute]
+[source,bash]
 ----
 sudo dnf updateinfo summary
+----
+
+.Example output
+[source,text]
+----
+Updating Subscription Management repositories.
+Last metadata expiration check: 0:14:22 ago on Tue 24 Nov 2026 09:15:02 AM UTC.
+Updates Information Summary: available
+    4 Security notice(s)
+        1 Critical Security notice(s)
+        2 Important Security notice(s)
+        1 Moderate Security notice(s)
+    12 Bugfix notice(s)
+    2 Enhancement notice(s)
 ----
 
 The *Security* line is what matters most — it tells you how many security advisories apply to
@@ -36,9 +53,18 @@ packages currently installed on this box.
 
 Now list the individual security advisories (RHSAs) and the packages they fix:
 
-[source,bash,role=execute]
+[source,bash]
 ----
 sudo dnf updateinfo list --security
+----
+
+.Example output
+[source,text]
+----
+RHSA-2026:1842 Critical/Sec.  openssl-libs-1:3.2.2-16.el10_0.x86_64
+RHSA-2026:1905 Important/Sec. sudo-1.9.15p5-8.el10_0.x86_64
+RHSA-2026:1911 Important/Sec. glibc-2.39-37.el10_0.x86_64
+RHSA-2026:1940 Moderate/Sec.  curl-8.9.1-5.el10_0.x86_64
 ----
 
 == Step 2.3 — List outstanding security CVE IDs
@@ -46,18 +72,47 @@ sudo dnf updateinfo list --security
 The same gap can be viewed as the CVE IDs it closes — handy when an auditor hands you a list of
 CVEs to confirm:
 
-[source,bash,role=execute]
+[source,bash]
 ----
 sudo dnf updateinfo list --cves
+----
+
+.Example output
+[source,text]
+----
+CVE-2026-24109 Critical/Sec.  openssl-libs-1:3.2.2-16.el10_0.x86_64
+CVE-2026-21884 Important/Sec. sudo-1.9.15p5-8.el10_0.x86_64
+CVE-2026-22910 Important/Sec. glibc-2.39-37.el10_0.x86_64
+CVE-2026-23004 Moderate/Sec.  curl-8.9.1-5.el10_0.x86_64
 ----
 
 == Step 2.4 — Inspect the detail
 
 Pull the full description, severity, and CVE list for the outstanding security advisories:
 
-[source,bash,role=execute]
+[source,bash]
 ----
 sudo dnf updateinfo info --security
+----
+
+.Example output (abbreviated)
+[source,text]
+----
+===============================================================================
+  Critical: openssl security update
+===============================================================================
+  Update ID : RHSA-2026:1842
+       Type : security
+    Updated : 2026-11-18 14:22:09 UTC
+       CVEs : CVE-2026-24109
+Description : OpenSSL is a toolkit that implements the Secure Sockets Layer
+            : (SSL) and Transport Layer Security (TLS) protocols, as well as a
+            : full-strength general-purpose cryptography library.
+            :
+            : Security Fix(es):
+            : * openssl: buffer overflow in X.509 certificate verification
+            :   (CVE-2026-24109)
+   Severity : Critical
 ----
 
 [quote, Manager Bill]
@@ -73,21 +128,56 @@ ____
 
 == Step 2.5 — Apply the security patches
 
-Install *only* the security-relevant updates in a single transaction:
+Install *only* the security-relevant updates in a single transaction (leaving non-security bugfixes
+and enhancements untouched):
 
-[source,bash,role=execute]
+[source,bash]
 ----
 sudo dnf -y --security update
 ----
 
+.Example output (abbreviated)
+[source,text]
+----
+Dependencies resolved.
+================================================================================
+ Package          Arch       Version                  Repository           Size
+================================================================================
+Upgrading:
+ curl             x86_64     8.9.1-5.el10_0           rhel-10-baseos      258 k
+ glibc            x86_64     2.39-37.el10_0           rhel-10-baseos      2.2 M
+ openssl-libs     x86_64     1:3.2.2-16.el10_0        rhel-10-baseos      2.4 M
+ sudo             x86_64     1.9.15p5-8.el10_0        rhel-10-baseos      1.1 M
+
+Transaction Summary
+================================================================================
+Upgrade  4 Packages
+
+Total download size: 6.0 M
+Running transaction
+  Upgrading        : glibc-2.39-37.el10_0.x86_64                            1/8
+  Upgrading        : openssl-libs-1:3.2.2-16.el10_0.x86_64                  2/8
+  Upgrading        : curl-8.9.1-5.el10_0.x86_64                             3/8
+  Upgrading        : sudo-1.9.15p5-8.el10_0.x86_64                          4/8
+  [...]
+Complete!
+----
+
 == Step 2.6 — Verify the gap is closed
 
-Re-run the security list. It should now be empty — every outstanding security advisory has been
+Re-run the security list. It now returns nothing — every outstanding security advisory has been
 applied:
 
-[source,bash,role=execute]
+[source,bash]
 ----
 sudo dnf updateinfo list --security
+----
+
+.Example output
+[source,text]
+----
+Updating Subscription Management repositories.
+Last metadata expiration check: 0:00:08 ago on Tue 24 Nov 2026 09:31:14 AM UTC.
 ----
 
 [NOTE]
@@ -97,5 +187,5 @@ rest of this lab — is the complementary half: it makes sure the system is _con
 even when every package is up to date. You need both.
 ====
 
-When the security list comes back empty, continue to the next module to start your first
-compliance audit.
+Once you have reviewed how `dnf updateinfo` identifies and closes known CVEs, continue to the
+next module to start your first compliance audit on *Box 1*.

@@ -15,7 +15,8 @@ virtualmachines:
       - git
       - cockpit
       - tmux
-      - vim 
+      - vim
+      - lynx
 
   - name: "node1"
     image: "rhel-10-2-eus-06-08-26"
