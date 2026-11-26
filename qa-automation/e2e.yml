@@ -1,13 +1,145 @@
 ---
-# E2E — End-to-end test
-# Runs all module solve + validate sequences to verify the full lab
-# works from start to finish without manual intervention.
-
-- name: "End-to-End Test"
+- name: Guard the destructive part of this QA run before connecting
   hosts: localhost
   connection: local
   gather_facts: false
   tasks:
-    - name: "TODO: Implement end-to-end test sequence"
-      ansible.builtin.debug:
-        msg: "Replace this task with your e2e test implementation"
+    - name: Require a disposable deployment for real CIS remediation
+      ansible.builtin.assert:
+        that: qa_disposable_lab | default(false) | bool
+        fail_msg: Use a fresh QA deployment and pass -e qa_disposable_lab=true. CIS remediation is not rolled back.
+
+- ansible.builtin.import_playbook: healthcheck.yml
+
+- name: Verify every compliance module in learner order
+  hosts: qa_bastions
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Run all modules in one root session because CIS changes sudo
+      ansible.builtin.shell: |
+        set -euo pipefail
+        work=$(mktemp -d)
+        trap 'rm -rf -- "$work"' EXIT
+        cd "$work"
+        ds=/usr/share/xml/scap/ssg/content/ssg-rhel10-ds.xml
+        profile=xccdf_org.ssgproject.content_profile_cis_server_l1
+
+        scan() {
+          local name=$1 rc=0
+          shift
+          oscap xccdf eval --profile "$profile" --results "$name.xml" --report "$name.html" "$@" "$ds" >/dev/null || rc=$?
+          if [[ $rc != 0 && $rc != 2 ]]; then
+            echo "OpenSCAP $name failed (rc=$rc)" >&2
+            return "$rc"
+          fi
+          test -s "$name.html"
+          grep -q '<rule-result' "$name.xml"
+        }
+
+        # 1: install tools and check the expected profiles exist.
+        dnf -y install openscap-scanner scap-security-guide openscap-utils
+        oscap --version
+        oscap info "$ds" > profiles
+        grep -Eq "Id:[[:space:]]+$profile$" profiles
+        grep -Eq 'Id:[[:space:]]+xccdf_org.ssgproject.content_profile_cis$' profiles
+
+        # 2: read-only Satellite workflow; never apply updates.
+        dnf updateinfo summary
+        dnf updateinfo list --security
+        dnf updateinfo list --cves
+        dnf updateinfo info --security
+
+        # 3–4: measure, remediate, and measure again.
+        scan before
+        scan remediation --remediate
+        scan after
+        before=$(grep -c '<result>fail</result>' before.xml || :)
+        after=$(grep -c '<result>fail</result>' after.xml || :)
+        echo "CIS L1 failures: $before before, $after after"
+        (( before > after ))
+
+        # Follow the bastion-to-node1 hop after hardening the bastion.
+        runuser -u rhel -- ssh -T -o BatchMode=yes -o ConnectTimeout=8 node1 'sudo -n /bin/bash -s' <<'NODE1_QA'
+          set -euo pipefail
+          test "$(hostname -s)" = node1
+          work=$(mktemp -d)
+          blueprint="lb2081-qa-$(basename "$work" | tr '[:upper:]' '[:lower:]' | tr -cd 'a-z0-9')"
+          compose_id=''
+          cleanup() {
+            local status=$?
+            trap - EXIT
+            if [[ -n "$compose_id" ]]; then
+              composer-cli compose cancel "$compose_id" >/dev/null 2>&1 || :
+              composer-cli compose delete "$compose_id" >/dev/null 2>&1 || :
+            fi
+            if [[ -f blueprint.toml ]]; then
+              composer-cli blueprints delete "$blueprint" >/dev/null 2>&1 || :
+            fi
+            rm -rf -- "$work"
+            exit "$status"
+          }
+          trap cleanup EXIT
+          cd "$work"
+          ds=/usr/share/xml/scap/ssg/content/ssg-rhel10-ds.xml
+          l1=xccdf_org.ssgproject.content_profile_cis_server_l1
+          l2=xccdf_org.ssgproject.content_profile_cis
+          custom=${l1}_qa_custom
+          exception=xccdf_org.ssgproject.content_rule_accounts_tmout
+          dnf -y install openscap-scanner scap-security-guide openscap-utils
+
+          scan() {
+            local name=$1 profile=$2 rc=0
+            shift 2
+            oscap xccdf eval --profile "$profile" --results "$name.xml" --report "$name.html" "$@" "$ds" >/dev/null || rc=$?
+            if [[ $rc != 0 && $rc != 2 ]]; then
+              echo "OpenSCAP $name failed (rc=$rc)" >&2
+              return "$rc"
+            fi
+            test -s "$name.html"
+            grep -q '<rule-result' "$name.xml"
+          }
+          evaluated() {
+            grep -Ec '<result>(pass|fail|error|unknown|notchecked|informational|fixed)</result>' "$1"
+          }
+
+          # 5: compare the two profiles on the same untouched second VM.
+          scan l1 "$l1"
+          scan l2 "$l2"
+          l1_count=$(evaluated l1.xml)
+          l2_count=$(evaluated l2.xml)
+          echo "node1 evaluated rules: L1=$l1_count, L2=$l2_count"
+          (( l2_count > l1_count ))
+
+          # 6: tailor the profile without editing the upstream datastream.
+          sha256sum "$ds" > original.sha
+          autotailor --output tailoring.xml --new-profile-id "$custom" --title 'QA custom CIS L1' --unselect "$exception" "$ds" "$l1"
+          grep -F "$exception" tailoring.xml | grep -Eq 'selected="false"'
+          scan tailored "$custom" --tailoring-file tailoring.xml
+          sha256sum -c original.sha
+
+          # 7: depsolve and queue the documented qcow2 build; the lab does not wait for completion.
+          dnf -y install composer-cli osbuild-composer
+          systemctl enable --now osbuild-composer.socket
+          test -S /run/weldr/api.socket
+          printf '%s\n' "name = \"$blueprint\"" 'description = "QA CIS L1 blueprint"' 'version = "0.0.1"' 'distro = "rhel-10.1"' '' '[customizations.openscap]' "datastream = \"$ds\"" "profile_id = \"$l1\"" > blueprint.toml
+          composer-cli blueprints push blueprint.toml
+          composer-cli blueprints show "$blueprint" > shown.toml
+          grep -Fq "$l1" shown.toml
+          composer-cli blueprints depsolve "$blueprint"
+          start=$(composer-cli compose start "$blueprint" qcow2)
+          echo "$start"
+          compose_id=$(grep -Eo '[[:xdigit:]]{8}(-[[:xdigit:]]{4}){3}-[[:xdigit:]]{12}' <<< "$start" | head -1)
+          test -n "$compose_id"
+          for attempt in {1..12}; do
+            status=$(composer-cli compose status)
+            line=$(grep -F "$compose_id" <<< "$status" || :)
+            if [[ $line =~ FAILED ]]; then echo "$line" >&2; exit 1; fi
+            if [[ $line =~ (WAITING|RUNNING|FINISHED) ]]; then echo "$line"; exit 0; fi
+            sleep 5
+          done
+          echo "Image Builder did not report compose $compose_id in an expected state" >&2
+          exit 1
+        NODE1_QA
+      args:
+        executable: /bin/bash

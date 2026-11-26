@@ -1,15 +1,30 @@
 ---
-# HEALTHCHECK — Quick environment readiness check
-# Runs post-provisioning to verify the lab environment is functional.
-# Should complete in under 60 seconds.
-#
-# Exit 0 = healthy, non-zero = unhealthy.
+- ansible.builtin.import_playbook: inventory.yml
 
-- name: "Environment Health Check"
-  hosts: localhost
-  connection: local
+- name: Verify the learner can reach both RHEL VMs and use Satellite repositories
+  hosts: qa_bastions
   gather_facts: false
   tasks:
-    - name: "TODO: Implement health checks"
-      ansible.builtin.debug:
-        msg: "Replace this task with checks that verify the environment is ready"
+    - name: Check learner access and repository configuration on the bastion
+      ansible.builtin.command: sudo -n dnf -q repolist --enabled
+      register: bastion_repos
+      changed_when: false
+
+    - name: Check node1 identity, learner sudo, repositories and Image Builder configuration
+      ansible.builtin.command:
+        argv: [ssh, -o, BatchMode=yes, -o, ConnectTimeout=8, node1, "hostname -s && rpm -E '%{rhel}' && sudo -n dnf -q repolist --enabled && sudo -n test -s /etc/osbuild-composer/repositories/rhel-10.1.json"]
+      register: node
+      changed_when: false
+
+    - name: Check the primary VM release
+      ansible.builtin.command: rpm -E '%{rhel}'
+      register: bastion_release
+      changed_when: false
+
+    - name: Require two usable RHEL 10 systems
+      ansible.builtin.assert:
+        that:
+          - bastion_release.stdout | trim == '10'
+          - node.stdout_lines[:2] == ['node1', '10']
+          - bastion_repos.stdout_lines | length > 1
+          - node.stdout_lines | length > 3
