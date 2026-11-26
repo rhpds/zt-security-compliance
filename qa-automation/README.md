@@ -17,7 +17,7 @@ the same lab content/provisioning revision. Do not run concurrently on the
 same deployment or use an active learner instance.
 
 E2E applies actual CIS Level 1 remediation to the bastion and **does not roll
-it back**. Discard the deployment afterwards. Module 2 only inspects Satellite
-advisories. On `node1` the playbook verifies both CIS scans, the tailoring
+it back**. Discard the deployment afterwards. Module 2 is a documentation-only
+walkthrough; E2E does not query advisories or apply updates. On `node1` the playbook verifies both CIS scans, the tailoring
 exception, and successful submission of the `qcow2` compose (not full image
 completion, which the lab does not require).
