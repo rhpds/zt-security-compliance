@@ -28,3 +28,31 @@
           - node.stdout_lines[:2] == ['node1', '10']
           - bastion_repos.stdout_lines | length > 1
           - node.stdout_lines | length > 3
+
+    - name: Resolve OpenSCAP packages through the bastion's configured package sources
+      ansible.builtin.command:
+        argv: [timeout, "20", sudo, -n, dnf, -q, repoquery, --queryformat, '%{name}', openscap-scanner, scap-security-guide, openscap-utils]
+      register: bastion_packages
+      changed_when: false
+
+    - name: Resolve OpenSCAP and Image Builder packages through node1's configured package sources
+      ansible.builtin.command:
+        argv:
+          - ssh
+          - -o
+          - BatchMode=yes
+          - -o
+          - ConnectTimeout=8
+          - node1
+          - >-
+            timeout 20 sudo -n dnf -q repoquery --queryformat '%{name}'
+            openscap-scanner scap-security-guide openscap-utils composer-cli osbuild-composer
+      register: node_packages
+      changed_when: false
+
+    - name: Require every package that the learner installs
+      ansible.builtin.assert:
+        that:
+          - "['openscap-scanner', 'scap-security-guide', 'openscap-utils'] | difference(bastion_packages.stdout_lines) | length == 0"
+          - "['openscap-scanner', 'scap-security-guide', 'openscap-utils', 'composer-cli', 'osbuild-composer'] | difference(node_packages.stdout_lines) | length == 0"
+        fail_msg: The enabled repositories did not resolve all required lab packages.
