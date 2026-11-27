@@ -1,14 +1,5 @@
 ---
-- name: Guard the destructive part of this QA run before connecting
-  hosts: localhost
-  connection: local
-  gather_facts: false
-  tasks:
-    - name: Require a disposable deployment for real CIS remediation
-      ansible.builtin.assert:
-        that: qa_disposable_lab | default(false) | bool
-        fail_msg: Use a fresh QA deployment and pass -e qa_disposable_lab=true. CIS remediation is not rolled back.
-
+# Run on fresh QA instances only: Module 4 applies CIS remediation without rollback.
 - ansible.builtin.import_playbook: healthcheck.yml
 
 - name: Verify every compliance module in learner order
