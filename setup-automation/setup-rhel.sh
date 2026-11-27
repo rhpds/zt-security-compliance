@@ -1,4 +1,5 @@
 #!/bin/bash
+set -eu
 USER=rhel
 
 echo "Adding wheel" > /root/post-run.log
@@ -58,7 +59,7 @@ install_rhel_key /root root:root root
 
 # node1 hostname resolution: prefer platform-provided DNS. If the platform exposes
 # node1's address via NODE1_IP (see setup-automation/main.yml), pin it in /etc/hosts.
-if [ -n "${NODE1_IP}" ] && ! getent hosts node1 >/dev/null 2>&1; then
+if [ -n "${NODE1_IP:-}" ] && ! getent hosts node1 >/dev/null 2>&1; then
   echo "${NODE1_IP} node1" >> /etc/hosts
 fi
 
