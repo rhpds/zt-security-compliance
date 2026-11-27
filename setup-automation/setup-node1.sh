@@ -1,4 +1,5 @@
 #!/bin/bash
+set -eu
 USER=rhel
 
 echo "Adding wheel" > /root/post-run.log
@@ -33,14 +34,11 @@ authorize_key() {
 authorize_key /home/rhel rhel:rhel
 authorize_key /root root:root
 
-dnf install composer-cli osbuild-composer -y
+# The runner reaches node1 over SSH. Do not restart its SSH transport.
+systemctl is-active --quiet sshd
 
-systemctl enable --now sshd
-
-# --- Red Hat Image Builder (osbuild-composer) for module-07 ---
-# composer-cli talks to osbuild-composer over its socket; enable it now so the
-# participant's first `composer-cli` call works without a cold-start wait.
-systemctl enable --now osbuild-composer.socket
+# The learner installs and starts Image Builder in module 7. Only stage its
+# Satellite repository configuration here.
 
 # The Lab environment is connected to an internal Red Hat Demo Platform Satellite server (demosat-ha.infra.demo.redhat.com) using Red Hat Subscription Manager (rhsm) certificates, rather than cdn.redhat.com.
 # Run these commands to write the exact repository override file pointing to your lab's Satellite URLs \
@@ -72,9 +70,6 @@ cat > /etc/osbuild-composer/repositories/rhel-10.1.json << 'EOF'
   ]
 }
 EOF
-
-dnf remove composer-cli osbuild-composer -y
-
 
 echo "Lab setup complete" >> /tmp/progress.log
 exit 0

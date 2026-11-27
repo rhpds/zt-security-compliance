@@ -29,6 +29,33 @@
           - bastion_repos.stdout_lines | length > 1
           - node.stdout_lines | length > 3
 
+    - name: Read the bastion SSH server host-key fingerprint
+      ansible.builtin.command:
+        argv: [sudo, -n, /usr/bin/ssh-keygen, -E, sha256, -lf, /etc/ssh/ssh_host_ed25519_key.pub]
+      register: bastion_host_key
+      changed_when: false
+
+    - name: Read the node1 SSH server host-key fingerprint through the learner connection
+      ansible.builtin.command:
+        argv:
+          - ssh
+          - -o
+          - BatchMode=yes
+          - -o
+          - ConnectTimeout=8
+          - node1
+          - sudo -n /usr/bin/ssh-keygen -E sha256 -lf /etc/ssh/ssh_host_ed25519_key.pub
+      register: node_host_key
+      changed_when: false
+
+    - name: Require distinct SSH server identities before any remediation
+      ansible.builtin.assert:
+        that:
+          - bastion_host_key.stdout is match('^256 +SHA256:[A-Za-z0-9+/]{43} ')
+          - node_host_key.stdout is match('^256 +SHA256:[A-Za-z0-9+/]{43} ')
+          - bastion_host_key.stdout.split()[1] != node_host_key.stdout.split()[1]
+        fail_msg: rhel and node1 must have distinct SSH host keys.
+
     - name: Resolve OpenSCAP packages through the bastion's configured package sources
       ansible.builtin.command:
         argv: [timeout, "20", sudo, -n, dnf, -q, repoquery, --queryformat, '%{name}', openscap-scanner, scap-security-guide, openscap-utils]
