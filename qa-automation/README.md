@@ -11,7 +11,7 @@ For a manual run, ensure the bastion's SSH host key is trusted.
 
 ```sh
 ansible-playbook -i localhost, qa-automation/healthcheck.yml
-ansible-playbook -i localhost, qa-automation/e2e.yml -e qa_disposable_lab=true
+ansible-playbook -i localhost, qa-automation/e2e.yml
 ```
 
 Run E2E on a **fresh, disposable QA deployment** with these playbooks and
