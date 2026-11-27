@@ -73,13 +73,29 @@
           - node1
           - >-
             timeout 20 sudo -n dnf -q repoquery --queryformat '%{name}'
-            openscap-scanner scap-security-guide openscap-utils composer-cli osbuild-composer
+            openscap-scanner scap-security-guide openscap-utils osbuild-composer
       register: node_packages
       changed_when: false
 
-    - name: Require every package that the learner installs
+    - name: Resolve the composer-cli capability (provided by weldr-client on RHEL 10)
+      ansible.builtin.command:
+        argv:
+          - ssh
+          - -o
+          - BatchMode=yes
+          - -o
+          - ConnectTimeout=8
+          - node1
+          - >-
+            timeout 20 sudo -n dnf -q repoquery --queryformat '%{name}'
+            --whatprovides composer-cli
+      register: composer_cli_providers
+      changed_when: false
+
+    - name: Require every package or capability that the learner installs
       ansible.builtin.assert:
         that:
           - "['openscap-scanner', 'scap-security-guide', 'openscap-utils'] | difference(bastion_packages.stdout_lines) | length == 0"
-          - "['openscap-scanner', 'scap-security-guide', 'openscap-utils', 'composer-cli', 'osbuild-composer'] | difference(node_packages.stdout_lines) | length == 0"
-        fail_msg: The enabled repositories did not resolve all required lab packages.
+          - "['openscap-scanner', 'scap-security-guide', 'openscap-utils', 'osbuild-composer'] | difference(node_packages.stdout_lines) | length == 0"
+          - composer_cli_providers.stdout | trim | length > 0
+        fail_msg: The enabled repositories did not resolve all required lab packages or the composer-cli capability.
